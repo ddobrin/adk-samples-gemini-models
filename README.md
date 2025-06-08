@@ -1,1 +1,1 @@
-# a2a-samples-gemini-models
+ADK samples with Gemini Models
