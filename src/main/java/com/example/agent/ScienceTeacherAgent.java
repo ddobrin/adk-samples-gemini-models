@@ -12,7 +12,7 @@ public class ScienceTeacherAgent {
 
     public static BaseAgent initAgent() {
         return LlmAgent.builder()
-                .name("ScienceAgent")
+                .name("ScienceAgent-ADK")
                 .description("Science teacher agent")
                 .model("gemini-2.5-flash-preview-05-20")
                 .instruction("""
