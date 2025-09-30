@@ -10,46 +10,86 @@
 
     <!-- Specify the version of Java you'll be using -->
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <google-adk.version>0.1.0</google-adk.version>
+        <spring-boot.version>3.5.6</spring-boot.version>
+        <spring-ai.version>1.1.0-M2</spring-ai.version>
+        <google-adk.version>0.3.1-SNAPSHOT</google-adk.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring AI BOM for version management -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- The ADK core dependency -->
         <dependency>
             <groupId>com.google.adk</groupId>
             <artifactId>google-adk</artifactId>
-            <version>0.1.0</version>
+            <version>${google-adk.version}</version>
         </dependency>
         <!-- The ADK dev web UI to debug your agent -->
         <dependency>
             <groupId>com.google.adk</groupId>
             <artifactId>google-adk-dev</artifactId>
-            <version>0.1.0</version>
+            <version>${google-adk.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.adk</groupId>
-            <artifactId>google-adk</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+      <!-- ADK Spring AI Integration -->
+      <dependency>
+        <groupId>com.google.adk</groupId>
+        <artifactId>google-adk-spring-ai</artifactId>
+        <version>${google-adk.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-google-genai</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-anthropic</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-openai</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.httpcomponents.client5</groupId>
+          <artifactId>httpclient5</artifactId>
+      </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Maven Exec Plugin for command line execution -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.google.adk.web.AdkWebServer</mainClass>
-                    <args>
-                        <arg>--adk.agents.source-dir=src/main/java</arg>
-                    </args>
-                    <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>
         </plugins>
