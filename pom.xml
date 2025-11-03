@@ -65,6 +65,10 @@
 
       <dependency>
         <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-vertex-ai-gemini</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
         <artifactId>spring-ai-google-genai</artifactId>
       </dependency>
       <dependency>
@@ -91,6 +95,13 @@
                 <configuration>
                     <mainClass>com.google.adk.web.AdkWebServer</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

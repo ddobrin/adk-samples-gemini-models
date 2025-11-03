@@ -13,7 +13,7 @@ public class SequentialAgentExample {
 
     private static final String APP_NAME = "SequentialCodePipelineAgent";
     private static final String USER_ID = "test_user_456";
-    private static final String MODEL_NAME = "gemini-2.5-pro-preview-06-05";
+    private static final String MODEL_NAME = "gemini-2.5-flash";
 
     public static void main(String[] args) {
         SequentialAgentExample sequentialAgentExample = new SequentialAgentExample();

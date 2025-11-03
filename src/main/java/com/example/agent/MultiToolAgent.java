@@ -24,7 +24,7 @@ public class MultiToolAgent {
     private static String USER_ID = "student";
     private static String NAME = "MultiToolAgent";
     private static final String APP_NAME = "MultiToolAgent";
-    private static final String MODEL_NAME = "gemini-2.5-flash-preview-05-20";
+    private static final String MODEL_NAME = "gemini-2.5-flash";
 
     // The run your agent with Dev UI, the ROOT_AGENT should be a global public static variable.
     public static BaseAgent ROOT_AGENT = initAgent();

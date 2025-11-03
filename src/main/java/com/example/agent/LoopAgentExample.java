@@ -22,7 +22,7 @@ public class LoopAgentExample {
     // --- Constants ---
     private static final String APP_NAME = "LoopingIterativeWritingPipeline";
     private static final String USER_ID = "test_user_456";
-    private static final String MODEL_NAME = "gemini-2.5-pro-preview-06-05";
+    private static final String MODEL_NAME = "gemini-2.5-flash";
 
     // --- State Keys ---
     private static final String STATE_CURRENT_DOC = "current_document";

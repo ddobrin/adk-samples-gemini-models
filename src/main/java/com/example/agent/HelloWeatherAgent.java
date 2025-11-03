@@ -35,7 +35,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class HelloWeatherAgent {
     public static BaseAgent ROOT_AGENT = initAgent();
     private static final String APP_NAME = "WeatherAgent";
-    private static final String MODEL_NAME = "gemini-2.5-flash-preview-05-20";
+    private static final String MODEL_NAME = "gemini-2.5-flash";
 
     private static BaseAgent initAgent() {
         return LlmAgent.builder()

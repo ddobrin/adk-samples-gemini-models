@@ -15,7 +15,7 @@ public class ParallelResearchPipeline {
 
     private static final String APP_NAME = "ParallelResearchPipeline";
     private static final String USER_ID = "research_user_01";
-    private static final String MODEL_NAME = "gemini-2.5-flash-preview-05-20";
+    private static final String MODEL_NAME = "gemini-2.5-flash";
 
     // Assume google_search is an instance of the GoogleSearchTool
     private static final GoogleSearchTool googleSearchTool = new GoogleSearchTool();
