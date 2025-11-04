@@ -14,7 +14,7 @@ public class ScienceTeacherAgent {
         return LlmAgent.builder()
                 .name("ScienceAgent-ADK")
                 .description("Science teacher agent")
-                .model("gemini-2.5-flash-preview-05-20")
+                .model("gemini-2.5-flash")
                 .instruction("""
                     You are a helpful science teacher that explains
                     science concepts to kids and teenagers.
