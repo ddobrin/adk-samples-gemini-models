@@ -242,7 +242,7 @@ This endpoint filters out tool execution traces and returns only clean, natural 
 
 **Default Agent Communication**
 ```
-https://your-service-url/a2a/remote/v1/message:send
+https://your-service-url/a2a/custom/v1/message:send
 ```
 This endpoint includes tool execution metadata (useful for debugging).
 
@@ -274,7 +274,7 @@ export APP_URL=$(gcloud run services describe adk-samples-gemini \
 export TOKEN=$(gcloud auth print-identity-token)
 
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-    $APP_URL/a2a/remote/v1/message:send \
+    $APP_URL/a2a/custom/v1/message:send \
     -H "Content-Type: application/json" \
     -d '{
     "jsonrpc": "2.0",
@@ -327,7 +327,7 @@ Call agents on remote services via A2A:
 
 ```java
 // Configure remote agent URL
-String remoteAgentUrl = "https://remote-service/a2a/remote/v1";
+String remoteAgentUrl = "https://remote-service/a2a/custom/v1";
 
 // The ADK framework handles remote calls automatically
 // when agents are configured with remote URLs
@@ -407,50 +407,42 @@ The `manage-ge-agent.sh` script provides a convenient way to manage agents in Ge
 - `jq` installed for JSON processing
 - Access to a Gemini Enterprise application
 
-### Configuration
+### Usage
 
-The script will prompt you for required configuration values when you run it. You can also set these values via environment variables to skip the prompts:
+The script requires the project ID and engine ID as command-line arguments:
 
 ```bash
-export GCP_PROJECT_ID="your-project-id"
-export PROJECT_NUMBER="your-project-number"
-export ENGINE_ID="your-engine-id"
-export ASSISTANT_ID="default_assistant"  # Optional, defaults to "default_assistant"
-export COLLECTION_ID="default_collection"  # Optional, defaults to "default_collection"
-export LOCATION="global"  # Optional, defaults to "global"
+./manage-ge-agent.sh <project-id> <engine-id> <command> [arguments]
 ```
 
-**Required Values:**
-- `GCP_PROJECT_ID` - Your Google Cloud Project ID
-- `PROJECT_NUMBER` - Your Google Cloud Project Number
-- `ENGINE_ID` - Your Gemini Enterprise Engine ID
+**Arguments:**
+- `project-id` - Your Google Cloud Project ID (required)
+- `engine-id` - Your Gemini Enterprise Engine ID (required)
+- `command` - The operation to perform: `list`, `register`, or `unregister`
 
-**Optional Values (with defaults):**
+**Optional Environment Variables:**
 - `ASSISTANT_ID` - Assistant ID (default: `default_assistant`)
 - `COLLECTION_ID` - Collection ID (default: `default_collection`)
 - `LOCATION` - Location (default: `global`)
 
-### Usage
+### Commands
 
 **List all registered agents:**
 ```bash
-./manage-ge-agent.sh list
+./manage-ge-agent.sh my-project my-engine-123 list
 ```
 
 **Register a new agent:**
 ```bash
-./manage-ge-agent.sh register https://your-service.run.app/.well-known/agent-card.json
-```
+./manage-ge-agent.sh my-project my-engine-123 register https://your-service.run.app/.well-known/agent-card.json
 
-The script will:
-1. Fetch the agent card from the URL
-2. Extract the agent name and description
-3. Register the agent with Gemini Enterprise
-4. Display the agent ID for future reference
+# Or with just the base URL (automatically appends /.well-known/agent-card.json)
+./manage-ge-agent.sh my-project my-engine-123 register https://your-service.run.app
+```
 
 **Unregister an agent:**
 ```bash
-./manage-ge-agent.sh unregister <agent-id>
+./manage-ge-agent.sh my-project my-engine-123 unregister <agent-id>
 ```
 
 ### Example Workflow
@@ -460,27 +452,31 @@ The script will:
    ./deploy.sh --build
    ```
 
-2. Get the agent card URL from the deployment output
+2. Get the service URL from the deployment output
 
 3. Register the agent with Gemini Enterprise:
    ```bash
-   ./manage-ge-agent.sh register https://adk-samples-gemini-sbgivfobaa-uc.a.run.app/.well-known/agent-card.json
+   ./manage-ge-agent.sh agentspace-manufacturing-1375 gemini-enterprise-17622848_1762284884969 \
+       register https://adk-samples-gemini-sbgivfobaa-uc.a.run.app
    ```
 
 4. List registered agents to verify:
    ```bash
-   ./manage-ge-agent.sh list
+   ./manage-ge-agent.sh agentspace-manufacturing-1375 gemini-enterprise-17622848_1762284884969 list
    ```
 
 5. To unregister later:
    ```bash
-   ./manage-ge-agent.sh unregister <agent-id>
+   ./manage-ge-agent.sh agentspace-manufacturing-1375 gemini-enterprise-17622848_1762284884969 \
+       unregister 8807211613516215369
    ```
 
 ### Features
 
-- **Automatic Agent Card Fetching**: Fetches and validates the agent card from the provided URL
-- **JSON Validation**: Ensures the agent card is valid JSON before registration
-- **Error Handling**: Provides clear error messages for common issues
+- **Automatic Project Number Lookup**: Automatically retrieves the project number from the project ID using `gcloud`
+- **Smart URL Handling**: Automatically appends `/.well-known/agent-card.json` to base URLs
+- **Agent Card Validation**: Fetches and validates the agent card before registration
+- **Authentication**: Uses Google Cloud identity tokens for secure access to Cloud Run services
+- **Error Handling**: Provides clear error messages and HTTP status codes for debugging
 - **Colored Output**: Uses colors to highlight success, errors, and warnings
-- **Configurable**: All parameters can be set via environment variables
+- **Clean Output**: Redirects informational messages to stderr, keeping stdout clean for JSON responses
