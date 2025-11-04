@@ -7,8 +7,17 @@ RUN apk add --no-cache git
 # Set working directory
 WORKDIR /adk
 
-# Clone the ADK Java repository
-RUN git clone https://github.com/google/adk-java.git .
+# Clone the ADK Java repository at specific commit
+# Pinned to commit 7487ab2 (Nov 2, 2025) which includes:
+# - A2A protocol support
+# - Spring AI integration
+# - Live audio support
+# This ensures reproducible builds and compatibility with our dependencies
+# Using git init + fetch to download only the specific commit (most efficient)
+RUN git init && \
+    git remote add origin https://github.com/google/adk-java.git && \
+    git fetch --depth 1 origin 7487ab21e2318ec6f66c70ca0198e5a5f0364427 && \
+    git reset --hard 7487ab21e2318ec6f66c70ca0198e5a5f0364427
 
 # First, install the parent POM
 RUN mvn install -N -DskipTests

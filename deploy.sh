@@ -157,6 +157,23 @@ echo ""
 
 # Deploy to Cloud Run
 echo -e "${GREEN}Deploying to Cloud Run...${NC}"
+
+# First, get the expected service URL (or use existing if service already exists)
+EXPECTED_SERVICE_URL="https://${SERVICE_NAME}-$(echo $PROJECT_ID | tr ':' '-' | tr '.' '-')-${REGION//-/}.a.run.app"
+
+# Check if service exists to get actual URL
+if gcloud run services describe "$SERVICE_NAME" \
+    --platform managed \
+    --region "$REGION" \
+    --project="$PROJECT_ID" &>/dev/null; then
+    EXPECTED_SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" \
+        --platform managed \
+        --region "$REGION" \
+        --project="$PROJECT_ID" \
+        --format="value(status.url)")
+    echo -e "${YELLOW}Using existing service URL:${NC} $EXPECTED_SERVICE_URL"
+fi
+
 gcloud run deploy "$SERVICE_NAME" \
     --image "$IMAGE_NAME" \
     --platform managed \
@@ -168,7 +185,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --cpu 2 \
     --timeout 300 \
     --max-instances 10 \
-    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,VERTEX_AI_LOCATION=$REGION"
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=$REGION,GOOGLE_GENAI_USE_VERTEXAI=True,AGENT_BASE_URL=$EXPECTED_SERVICE_URL"
 
 echo ""
 echo -e "${GREEN}=== Deployment Complete ===${NC}"
@@ -183,7 +200,10 @@ SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" \
 
 echo -e "${GREEN}Service URL:${NC} $SERVICE_URL"
 echo ""
+echo -e "${GREEN}Agent Card URL:${NC} $SERVICE_URL/.well-known/agent-card.json"
+echo ""
 echo -e "${YELLOW}Note:${NC} This service requires authentication."
+echo -e "${YELLOW}Agent Base URL:${NC} The AGENT_BASE_URL environment variable has been set to: $SERVICE_URL"
 echo ""
 echo -e "${YELLOW}To access the service with authentication:${NC}"
 echo "  curl -H \"Authorization: Bearer \$(gcloud auth print-identity-token)\" $SERVICE_URL"
@@ -194,8 +214,18 @@ echo ""
 echo -e "${YELLOW}To view logs:${NC}"
 echo "  gcloud run services logs read $SERVICE_NAME --region=$REGION --project=$PROJECT_ID"
 echo ""
+echo -e "${YELLOW}To verify the agent card:${NC}"
+echo "  curl -H \"Authorization: Bearer \$(gcloud auth print-identity-token)\" $SERVICE_URL/.well-known/agent-card.json | jq ."
+echo ""
 echo -e "${YELLOW}To update environment variables:${NC}"
 echo "  gcloud run services update $SERVICE_NAME --region=$REGION --project=$PROJECT_ID --set-env-vars KEY=VALUE"
+echo ""
+echo -e "${YELLOW}Agent Card Configuration:${NC}"
+echo "  The agent card will automatically use the Cloud Run service URL."
+echo "  To customize agent details, set these environment variables:"
+echo "    AGENT_NAME - Agent display name (default: ADK Multi-Agent Service)"
+echo "    AGENT_DESCRIPTION - Agent description"
+echo "    AGENT_VERSION - Agent version (default: 1.0.0)"
 echo ""
 echo -e "${YELLOW}To grant access to specific users/service accounts:${NC}"
 echo "  gcloud run services add-iam-policy-binding $SERVICE_NAME \\"
