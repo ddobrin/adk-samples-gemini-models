@@ -10,11 +10,11 @@
 
     <!-- Specify the version of Java you'll be using -->
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.5.6</spring-boot.version>
-        <spring-ai.version>1.1.0-M2</spring-ai.version>
+        <spring-boot.version>3.5.7</spring-boot.version>
+        <spring-ai.version>1.1.0-M4</spring-ai.version>
         <google-adk.version>0.3.1-SNAPSHOT</google-adk.version>
     </properties>
     <dependencyManagement>
