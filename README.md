@@ -1,30 +1,50 @@
 # ADK Samples with Gemini Models
 
-This repository contains sample agents built with the Google Agent Development Kit (ADK) using Gemini models.
+This repository contains sample agents built with the Google Agent Development Kit (ADK) using Gemini models, with support for A2A (Agent-to-Agent) protocol and Gemini Enterprise integration.
 
 ## Table of Contents
+- [Features](#features)
 - [Local Development](#local-development)
 - [Cloud Run Deployment](#cloud-run-deployment)
+- [A2A (Agent-to-Agent) Protocol](#a2a-agent-to-agent-protocol)
+- [Gemini Enterprise Integration](#gemini-enterprise-integration)
 - [Testing](#testing)
+- [Available Agents](#available-agents)
+
+## Features
+
+- **Weather Agent**: Provides weather information for cities worldwide
+- **A2A Protocol**: Standardized agent-to-agent communication
+- **Custom A2A Endpoint**: Clean responses without tool execution traces
+- **Gemini Enterprise**: Full integration with Gemini Enterprise applications
+- **Cloud Run Ready**: Automated deployment to Google Cloud Run
+- **Service Account Authentication**: No API keys required in production
 
 ## Local Development
 
-### Set environment variables
+### Prerequisites
+
+Set environment variables:
 ```bash
-export ANTHROPIC_API_KEY=...
-export OPENAI_API_KEY=... 
+# Required for local development with Gemini models
 export GOOGLE_API_KEY=... 
 export GOOGLE_CLOUD_PROJECT=...
 export GOOGLE_CLOUD_LOCATION=us-central1
+
+# Optional - only if you plan to add agents using these models
+# export ANTHROPIC_API_KEY=...
+# export OPENAI_API_KEY=...
 ```
 
 In IDE:
-```aiexclude
-ANTHROPIC_API_KEY=...;OPENAI_API_KEY=...;GOOGLE_API_KEY=...;ADK_AGENTS_SOURCE_DIR=<full-path>/adk-samples-gemini-models/
+```
+GOOGLE_API_KEY=...;GOOGLE_CLOUD_PROJECT=...;GOOGLE_CLOUD_LOCATION=us-central1;ADK_AGENTS_SOURCE_DIR=<full-path>/adk-samples-gemini-models/
 ```
 
-Clone the ADK repo
-```aiexclude
+### Setup
+
+Clone the ADK repo:
+```bash
 # Clone and checkout specific commit for reproducible builds
 # Pinned to commit 7487ab2 (Nov 2, 2025) which includes A2A protocol support
 git clone https://github.com/google/adk-java.git
@@ -33,31 +53,32 @@ git checkout 7487ab21e2318ec6f66c70ca0198e5a5f0364427
 ./mvnw clean install -DskipTests
 ```
 
-Clone the samples repo
-```aiexclude
-git clone https://github.com/ddobrin/adk-samples-gemini-models.git
+Clone the samples repo:
+```bash
+git clone https://github.com/xiangshen-dk/adk-samples-gemini-models.git
 cd adk-samples-gemini-models/
 mvn clean package
 ```
 
-Run samples
-```aiexclude
+### Running Locally
+
+Run samples:
+```bash
 mvn spring-boot:run -Dspring-boot.run.arguments="--adk.agents.source-dir=<full-path>/adk-samples-gemini-models/"
  
- or 
+# or 
  
 export ADK_AGENTS_SOURCE_DIR=<full-path>/adk-samples-gemini-models/
 mvn spring-boot:run
 ```
 
-Alternatively, uncomment the following line in application.properties and specify the directory
-```aiexclude
+Alternatively, uncomment the following line in application.properties and specify the directory:
+```
 adk.agents.source-dir=...
 ```
 
-It starts the AdkWebServer specified in the pom.xml
+The application starts the AdkWebServer specified in the pom.xml:
 ```xml
-...
 <build>
   <plugins>
     <plugin>
@@ -70,7 +91,6 @@ It starts the AdkWebServer specified in the pom.xml
     </plugin>
   </plugins>
 </build>
-...
 ```
 
 ## Cloud Run Deployment
@@ -101,7 +121,7 @@ The script will:
 
 ### Configuration
 
-You can customize the deployment by setting environment variables:
+Customize the deployment by setting environment variables:
 
 ```bash
 export GCP_PROJECT_ID=your-project-id
@@ -119,152 +139,64 @@ The Cloud Run service uses Vertex AI models with service account authentication:
   - `roles/logging.logWriter` - Write logs to Cloud Logging
 - **No API keys required** - Authentication handled via Google Cloud IAM
 
-## Testing
-
-### Automated Testing
-
-Run the automated test script to verify your deployment:
-
-```bash
-./test-cloud-run.sh
-```
-
-This script will:
-1. Automatically discover the Cloud Run service URL
-2. Obtain authentication token
-3. List available agents
-4. Test the WeatherAgent with a sample query
-5. Test the MultiToolAgent with a time query
-
-### Manual Testing
-
-Get the service URL and authentication token:
-
-```bash
-export APP_URL=$(gcloud run services describe adk-samples-gemini \
-    --platform managed \
-    --region us-central1 \
-    --format="value(status.url)")
-export TOKEN=$(gcloud auth print-identity-token)
-```
-
-List available agents:
-
-```bash
-curl -X GET -H "Authorization: Bearer $TOKEN" $APP_URL/list-apps
-```
-
-Create a session:
-
-```bash
-curl -X POST -H "Authorization: Bearer $TOKEN" \
-    $APP_URL/apps/WeatherAgent/users/user123/sessions/session_test \
-    -H "Content-Type: application/json" \
-    -d '{}'
-```
-
-Send a message to an agent:
-
-```bash
-curl -X POST -H "Authorization: Bearer $TOKEN" \
-    $APP_URL/run_sse \
-    -H "Content-Type: application/json" \
-    -d '{
-    "appName": "WeatherAgent",
-    "userId": "user123",
-    "sessionId": "session_test",
-    "newMessage": {
-        "role": "user",
-        "parts": [{
-            "text": "What is the weather in NYC?"
-        }]
-    },
-    "streaming": false
-}'
-```
-
-### Available Agents
-
-- **WeatherAgent** - Provides weather information for cities
-- **MultiToolAgent** - Answers questions about time and weather
-- **LoopingIterativeWritingPipeline** - Iterative document writing with critique
-- **ScienceAgent-ADK** - Science teaching assistant
-
-### Viewing Logs
-
-View Cloud Run logs:
-
-```bash
-gcloud run services logs read adk-samples-gemini \
-    --region=us-central1 \
-    --project=$GCP_PROJECT_ID
-```
-
-### Granting Access
-
-To allow specific users to invoke the service:
-
-```bash
-gcloud run services add-iam-policy-binding adk-samples-gemini \
-    --region=us-central1 \
-    --member='user:EMAIL@example.com' \
-    --role='roles/run.invoker'
-```
-
 ## A2A (Agent-to-Agent) Protocol
 
 ### Overview
 
-This project includes support for the Google A2A (Agent-to-Agent) protocol, enabling agents to communicate with each other across services using a standardized JSON-RPC interface.
+This project includes comprehensive support for the Google A2A (Agent-to-Agent) protocol, enabling agents to communicate with each other across services using a standardized JSON-RPC interface.
 
-### Features
+### Key Features
 
 - **Standardized Communication**: Agents communicate via A2A protocol over HTTP
+- **Custom Clean Endpoint**: Special endpoint that filters out tool execution traces
 - **Remote Agent Calls**: Call agents deployed on different services
 - **Multi-Agent Systems**: Build distributed agent architectures
-- **Clean Responses**: Custom endpoint filters out tool execution traces
 - **Backward Compatible**: A2A is opt-in and doesn't affect existing functionality
 
 ### A2A Endpoints
 
-When deployed, the service provides three A2A endpoints:
+The service provides three A2A endpoints:
 
-**Agent Discovery (Agent Card)**
+#### 1. Agent Discovery (Agent Card)
 ```
 https://your-service-url/.well-known/agent-card.json
 ```
+Returns agent metadata and capabilities according to A2A specification.
 
-**Custom Agent Communication (Clean Responses)**
+#### 2. Custom Agent Communication (Clean Responses) ✨
 ```
 https://your-service-url/a2a/custom/v1/message:send
 ```
-This endpoint filters out tool execution traces and returns only clean, natural language responses.
+**This is the recommended endpoint** - Returns only clean, natural language responses without tool execution traces, function calls, or metadata tables.
 
-**Default Agent Communication**
+#### 3. Default Agent Communication
 ```
-https://your-service-url/a2a/custom/v1/message:send
+https://your-service-url/a2a/remote/v1/message:send
 ```
-This endpoint includes tool execution metadata (useful for debugging).
+Standard ADK endpoint that includes tool execution metadata (useful for debugging).
 
-### Configuration
+### Custom A2A Endpoint Benefits
 
-A2A is enabled by default. To disable it, set the environment variable:
-
-```bash
-export A2A_ENABLED=false
-```
-
-Or configure in `application.yaml`:
-
-```yaml
-adk:
-  a2a:
-    enabled: false
-```
+The custom endpoint (`/a2a/custom/v1/message:send`) provides:
+- **Clean Responses**: Filters out all tool execution traces
+- **Natural Language Only**: Returns only the final agent response
+- **Production Ready**: Ideal for user-facing applications
+- **Gemini Enterprise Compatible**: Works seamlessly with Gemini Enterprise
 
 ### Testing A2A Protocol
 
-Test the A2A endpoint with curl:
+#### Test Custom Endpoint (Recommended)
+
+Use the provided test script:
+```bash
+# Test locally
+./test-custom-a2a.sh
+
+# Test on Cloud Run
+./test-custom-a2a.sh https://your-service-url
+```
+
+#### Manual Testing
 
 ```bash
 export APP_URL=$(gcloud run services describe adk-samples-gemini \
@@ -273,6 +205,7 @@ export APP_URL=$(gcloud run services describe adk-samples-gemini \
     --format="value(status.url)")
 export TOKEN=$(gcloud auth print-identity-token)
 
+# Test custom endpoint (clean responses)
 curl -X POST -H "Authorization: Bearer $TOKEN" \
     $APP_URL/a2a/custom/v1/message:send \
     -H "Content-Type: application/json" \
@@ -293,52 +226,6 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
     }
 }'
 ```
-
-### Agent-to-Agent Communication
-
-#### Local Agent Communication
-
-Agents within the same service can communicate directly:
-
-```java
-// Create specialized agents
-BaseAgent weatherAgent = LlmAgent.builder()
-    .name("WeatherSpecialist")
-    .model("gemini-2.5-flash")
-    .tools(weatherTool)
-    .build();
-
-BaseAgent timeAgent = LlmAgent.builder()
-    .name("TimeSpecialist")
-    .model("gemini-2.5-flash")
-    .tools(timeTool)
-    .build();
-
-// Coordinator agent that uses both
-BaseAgent coordinator = SequentialAgent.builder()
-    .name("Coordinator")
-    .subAgents(weatherAgent, timeAgent)
-    .build();
-```
-
-#### Remote Agent Communication
-
-Call agents on remote services via A2A:
-
-```java
-// Configure remote agent URL
-String remoteAgentUrl = "https://remote-service/a2a/custom/v1";
-
-// The ADK framework handles remote calls automatically
-// when agents are configured with remote URLs
-```
-
-### Example Agents
-
-The project includes A2A example agents:
-
-- **A2AMultiAgentExample**: Demonstrates local multi-agent coordination
-- **RemoteA2AAgentExample**: Shows how to configure remote agent calls
 
 ### A2A Protocol Specification
 
@@ -364,7 +251,7 @@ The A2A protocol uses JSON-RPC 2.0 format:
 }
 ```
 
-**Response:**
+**Response (Custom Endpoint):**
 ```json
 {
   "jsonrpc": "2.0",
@@ -372,7 +259,7 @@ The A2A protocol uses JSON-RPC 2.0 format:
   "result": {
     "role": "agent",
     "parts": [
-      { "kind": "text", "text": "Agent response here" }
+      { "kind": "text", "text": "The weather in NYC is currently 72°F with partly cloudy skies." }
     ],
     "messageId": "response-message-id",
     "contextId": "conversation-context-id",
@@ -381,33 +268,20 @@ The A2A protocol uses JSON-RPC 2.0 format:
 }
 ```
 
-### Benefits of A2A
-
-1. **Standardization**: Common protocol for agent communication
-2. **Interoperability**: Agents from different teams/services can communicate
-3. **Scalability**: Distribute agents across multiple services
-4. **Flexibility**: Mix local and remote agents in the same system
-5. **Debugging**: Standard format makes debugging easier
-
-### Learn More
-
-- [A2A Protocol Specification](https://github.com/google/A2A/)
-- [ADK Java A2A Documentation](https://github.com/google/adk-java/tree/main/a2a)
-- [ADK Documentation](https://google.github.io/adk-docs/)
-
-## Gemini Enterprise Agent Management
+## Gemini Enterprise Integration
 
 ### Overview
 
-The `manage-ge-agent.sh` script provides a convenient way to manage agents in Gemini Enterprise applications. It supports listing, registering, and unregistering agents.
+The `manage-ge-agent.sh` script provides seamless integration with Gemini Enterprise applications, allowing you to register your agents for use within the Gemini Enterprise ecosystem.
 
 ### Prerequisites
 
 - `gcloud` CLI installed and authenticated
 - `jq` installed for JSON processing
 - Access to a Gemini Enterprise application
+- Deployed Cloud Run service with A2A support
 
-### Usage
+### Management Script Usage
 
 The script requires the project ID and engine ID as command-line arguments:
 
@@ -427,56 +301,198 @@ The script requires the project ID and engine ID as command-line arguments:
 
 ### Commands
 
-**List all registered agents:**
+#### List Registered Agents
 ```bash
 ./manage-ge-agent.sh my-project my-engine-123 list
 ```
 
-**Register a new agent:**
+#### Register Your Agent
 ```bash
+# With full agent card URL
 ./manage-ge-agent.sh my-project my-engine-123 register https://your-service.run.app/.well-known/agent-card.json
 
-# Or with just the base URL (automatically appends /.well-known/agent-card.json)
+# With base URL (automatically appends /.well-known/agent-card.json)
 ./manage-ge-agent.sh my-project my-engine-123 register https://your-service.run.app
 ```
 
-**Unregister an agent:**
+#### Unregister an Agent
 ```bash
 ./manage-ge-agent.sh my-project my-engine-123 unregister <agent-id>
 ```
 
-### Example Workflow
+### Complete Workflow Example
 
-1. Deploy your agent to Cloud Run:
+1. **Deploy your agent to Cloud Run:**
    ```bash
    ./deploy.sh --build
    ```
 
-2. Get the service URL from the deployment output
+2. **Note the service URL from deployment output**
 
-3. Register the agent with Gemini Enterprise:
+3. **Register with Gemini Enterprise:**
    ```bash
-   ./manage-ge-agent.sh agentspace-manufacturing-1375 gemini-enterprise-17622848_1762284884969 \
-       register https://adk-samples-gemini-sbgivfobaa-uc.a.run.app
+   ./manage-ge-agent.sh your-project your-engine-id \
+       register https://your-service-xxxxx-uc.a.run.app
    ```
 
-4. List registered agents to verify:
+4. **Verify registration:**
    ```bash
-   ./manage-ge-agent.sh agentspace-manufacturing-1375 gemini-enterprise-17622848_1762284884969 list
+   ./manage-ge-agent.sh your-project your-engine-id list
    ```
 
-5. To unregister later:
-   ```bash
-   ./manage-ge-agent.sh agentspace-manufacturing-1375 gemini-enterprise-17622848_1762284884969 \
-       unregister 8807211613516215369
-   ```
+5. **Your agent is now available in Gemini Enterprise!**
 
-### Features
+### Script Features
 
-- **Automatic Project Number Lookup**: Automatically retrieves the project number from the project ID using `gcloud`
-- **Smart URL Handling**: Automatically appends `/.well-known/agent-card.json` to base URLs
-- **Agent Card Validation**: Fetches and validates the agent card before registration
-- **Authentication**: Uses Google Cloud identity tokens for secure access to Cloud Run services
-- **Error Handling**: Provides clear error messages and HTTP status codes for debugging
-- **Colored Output**: Uses colors to highlight success, errors, and warnings
-- **Clean Output**: Redirects informational messages to stderr, keeping stdout clean for JSON responses
+- **Automatic Project Number Lookup**: Retrieves project number from project ID
+- **Smart URL Handling**: Auto-appends `/.well-known/agent-card.json` to base URLs
+- **Agent Card Validation**: Validates agent card before registration
+- **Secure Authentication**: Uses Google Cloud identity tokens
+- **Clear Error Messages**: Helpful debugging with HTTP status codes
+- **Colored Output**: Visual feedback for success/errors/warnings
+
+## Testing
+
+### Automated Testing
+
+#### Test Custom A2A Endpoint
+```bash
+# Test locally
+./test-custom-a2a.sh
+
+# Test on Cloud Run
+./test-custom-a2a.sh https://your-service-url
+```
+
+The test script will:
+- Automatically discover the Cloud Run service URL (if deployed)
+- Obtain authentication tokens
+- Test the WeatherAgent with sample queries
+- Verify clean response format (no tool traces)
+- Compare custom endpoint vs default endpoint responses
+
+### Manual Testing
+
+#### Get Service Details
+```bash
+export APP_URL=$(gcloud run services describe adk-samples-gemini \
+    --platform managed \
+    --region us-central1 \
+    --format="value(status.url)")
+export TOKEN=$(gcloud auth print-identity-token)
+```
+
+#### List Available Agents
+```bash
+curl -X GET -H "Authorization: Bearer $TOKEN" $APP_URL/list-apps
+```
+
+#### Create a Session
+```bash
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+    $APP_URL/apps/WeatherAgent/users/user123/sessions/session_test \
+    -H "Content-Type: application/json" \
+    -d '{}'
+```
+
+#### Send a Message to an Agent
+```bash
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+    $APP_URL/run_sse \
+    -H "Content-Type: application/json" \
+    -d '{
+    "appName": "WeatherAgent",
+    "userId": "user123",
+    "sessionId": "session_test",
+    "newMessage": {
+        "role": "user",
+        "parts": [{
+            "text": "What is the weather in NYC?"
+        }]
+    },
+    "streaming": false
+}'
+```
+
+### Viewing Logs
+
+View Cloud Run logs:
+```bash
+gcloud run services logs read adk-samples-gemini \
+    --region=us-central1 \
+    --project=$GCP_PROJECT_ID
+```
+
+### Granting Access
+
+To allow specific users to invoke the service:
+```bash
+gcloud run services add-iam-policy-binding adk-samples-gemini \
+    --region=us-central1 \
+    --member='user:EMAIL@example.com' \
+    --role='roles/run.invoker'
+```
+
+## Available Agent
+
+### WeatherAgent
+
+The service provides a **WeatherAgent** that can answer questions about weather conditions in different cities. The agent:
+- Uses the Gemini 2.5 Flash model
+- Provides weather forecasts for any city
+- Returns clean, natural language responses
+- Filters out tool execution traces when using the custom A2A endpoint
+
+### Agent Access Methods
+
+The WeatherAgent is accessible through:
+1. **Direct API** - Traditional REST endpoints
+2. **A2A Protocol** - Standardized agent communication (recommended: `/a2a/custom/v1/message:send`)
+3. **Gemini Enterprise** - When registered using the management script
+
+### Example Queries
+
+- "What's the weather in London?"
+- "Tell me about the weather in Tokyo"
+- "Is it sunny in New York?"
+- "What's the temperature in Paris?"
+
+## Configuration
+
+### Environment Variables
+
+Configure the service behavior through environment variables:
+
+```bash
+# A2A Protocol
+export A2A_ENABLED=true  # Enable/disable A2A support
+
+# Agent Configuration
+export AGENT_BASE_URL=https://your-service.run.app
+export AGENT_NAME="ADK Multi-Agent Service"
+export AGENT_DESCRIPTION="Multi-agent service with weather, time, and science capabilities"
+```
+
+### Application Configuration
+
+Configure in `application.yaml`:
+```yaml
+adk:
+  a2a:
+    enabled: true
+  agents:
+    source-dir: /path/to/agents
+
+agent:
+  base:
+    url: ${AGENT_BASE_URL:http://localhost:8080}
+  name: ${AGENT_NAME:ADK Multi-Agent Service}
+  description: ${AGENT_DESCRIPTION:Multi-agent service}
+```
+
+## Learn More
+
+- [A2A Protocol Specification](https://github.com/google/A2A/)
+- [ADK Java Documentation](https://github.com/google/adk-java)
+- [ADK Documentation](https://google.github.io/adk-docs/)
+- [Gemini Enterprise Documentation](https://docs.cloud.google.com/gemini/enterprise/docs)
