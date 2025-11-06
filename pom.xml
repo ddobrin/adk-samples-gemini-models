@@ -63,6 +63,22 @@
         <version>${google-adk.version}</version>
       </dependency>
 
+      <!-- ADK A2A (Agent-to-Agent) Protocol Support -->
+      <dependency>
+        <groupId>com.google.adk</groupId>
+        <artifactId>google-adk-a2a</artifactId>
+        <version>${google-adk.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.adk</groupId>
+        <artifactId>google-adk-a2a-webservice</artifactId>
+        <version>${google-adk.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-vertex-ai-gemini</artifactId>
+      </dependency>
       <dependency>
         <groupId>org.springframework.ai</groupId>
         <artifactId>spring-ai-google-genai</artifactId>
@@ -91,6 +107,13 @@
                 <configuration>
                     <mainClass>com.google.adk.web.AdkWebServer</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

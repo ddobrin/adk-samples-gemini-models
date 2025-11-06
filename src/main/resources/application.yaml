@@ -1,13 +1,37 @@
+server:
+  port: ${PORT:8080}
+
+# Agent Card Configuration
+# These values are used to generate the A2A-compliant agent card
+agent:
+  base:
+    # Base URL where the agent can be reached
+    # For Cloud Run, this should be set to your Cloud Run service URL
+    # Example: https://your-service-abc123-uc.a.run.app
+    url: ${AGENT_BASE_URL:http://localhost:8080}
+  name: ${AGENT_NAME:ADK Multi-Agent Service}
+  description: ${AGENT_DESCRIPTION:Multi-agent service with weather, time, and science capabilities}
+  version: ${AGENT_VERSION:1.0.0}
+
 spring:
   ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GOOGLE_CLOUD_PROJECT}
+          location: ${VERTEX_AI_LOCATION:us-central1}
+          chat:
+            options:
+              model: gemini-2.5-flash
+              temperature: 0.7
     openai:
-      api-key: ${OPENAI_API_KEY}
+      api-key: ${OPENAI_API_KEY:}
       chat:
         options:
           model: gpt-4o-mini
           temperature: 0.7
     anthropic:
-      api-key: ${ANTHROPIC_API_KEY}
+      api-key: ${ANTHROPIC_API_KEY:}
       chat:
         options:
           model: claude-sonnet-4-20250514
@@ -16,7 +40,7 @@ spring:
 # ADK Spring AI Configuration
 adk:
   spring-ai:
-    default-model: "claude-sonnet-4-20250514"
+    default-model: "gemini-2.5-flash"
     auto-configuration:
       enabled: true
     validation:
@@ -25,3 +49,17 @@ adk:
     observability:
       enabled: true
       metrics-enabled: true
+  
+  # A2A (Agent-to-Agent) Protocol Configuration
+  # Enabled to support Discovery Engine integration
+  # Uses HelloWeatherAgent.ROOT_AGENT as the default agent for A2A communication
+  a2a:
+    enabled: ${A2A_ENABLED:true}
+    # Let ADK use its default endpoint path
+    # We'll check logs to see what path it actually registers
+    timeout:
+      seconds: 300
+    # Agent discovery and registration
+    registry:
+      enabled: true
+      # Agents will be automatically registered for A2A communication
