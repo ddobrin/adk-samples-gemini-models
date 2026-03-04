@@ -13,9 +13,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.5.7</spring-boot.version>
-        <spring-ai.version>1.1.0-M4</spring-ai.version>
-        <google-adk.version>0.3.1-SNAPSHOT</google-adk.version>
+        <spring-boot.version>4.0.2</spring-boot.version>
+        <spring-ai.version>2.0.0-M2</spring-ai.version>
+        <google-adk.version>0.7.1-SNAPSHOT</google-adk.version>
     </properties>
     <dependencyManagement>
         <dependencies>

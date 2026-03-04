@@ -24,7 +24,7 @@ public class ScienceTeacherAgentOpenAIModel {
         SpringAI springAI = new SpringAI(openAiModel, GPT_MODEL);
 
         return LlmAgent.builder()
-                .name("ScienceAgent-OpenAI-gpt-41-mini-Model")
+                .name("ScienceAgent-OpenAI-gpt-41-mini")
                 .description("A science teacher agent that explains science concepts to kids and teenagers using a real OpenAI API")
                 .model(springAI)
                 .instruction("""

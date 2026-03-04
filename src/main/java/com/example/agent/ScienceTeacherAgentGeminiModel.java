@@ -14,7 +14,7 @@ public class ScienceTeacherAgentGeminiModel {
     // (the agent must be initialized at declaration time)
     public static BaseAgent ROOT_AGENT = initAgent();
 
-    private static final String GEMINI_MODEL = "gemini-2.5-flash";
+    private static final String GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
 
     public static BaseAgent initAgent() {
       // Create Google GenAI client using API key (not Vertex AI)
@@ -30,7 +30,7 @@ public class ScienceTeacherAgentGeminiModel {
 
       // Create agent
       return LlmAgent.builder()
-              .name("ScienceAgent-Gemini-Flash-2-5-Model")
+              .name("ScienceAgent-Gemini-Flash-3-1")
               .description("A science teacher agent that explains science concepts to kids and teenagers using a real Gemini API")
               .model(springAI)
               .instruction("""

@@ -13,7 +13,7 @@ public class ScienceTeacherAgentAnthropicModel {
     // (the agent must be initialized at declaration time)
     public static BaseAgent ROOT_AGENT = initAgent();
 
-    private static final String CLAUDE_MODEL = "claude-sonnet-4-5";
+    private static final String CLAUDE_MODEL = "claude-sonnet-4-6";
 
     public static BaseAgent initAgent() {
         AnthropicApi anthropicApi =
@@ -25,7 +25,7 @@ public class ScienceTeacherAgentAnthropicModel {
         SpringAI springAI = new SpringAI(anthropicModel, CLAUDE_MODEL);
 
         return LlmAgent.builder()
-                .name("ScienceAgent-Anthropic-Sonnet4-5-Model")
+                .name("ScienceAgent-Anthropic-Sonnet")
                 .description("A science teacher agent that explains science concepts to kids and teenagers using a real Anthropic API.")
                 .model(springAI)
                 .instruction("""
